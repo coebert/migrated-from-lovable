@@ -1,0 +1,64 @@
+{
+  "name": "PostopBooking",
+  "type": "object",
+  "properties": {
+    "hospital_number": {
+      "type": "string"
+    },
+    "patient_initials": {
+      "type": "string"
+    },
+    "age": {
+      "type": "number"
+    },
+    "sex": {
+      "type": "string",
+      "enum": [
+        "male",
+        "female",
+        "other",
+        "unknown"
+      ]
+    },
+    "proposed_procedure": {
+      "type": "string"
+    },
+    "predicted_level": {
+      "type": "string",
+      "enum": [
+        "level_1",
+        "level_2",
+        "level_3"
+      ],
+      "default": "level_2"
+    },
+    "proposed_surgery_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "surgical_specialty": {
+      "type": "string"
+    },
+    "reason_for_bed": {
+      "type": "string"
+    },
+    "booking_status": {
+      "type": "string",
+      "enum": [
+        "requested",
+        "confirmed",
+        "arrived",
+        "cancelled"
+      ],
+      "default": "requested"
+    },
+    "is_test": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "required": [
+    "patient_initials",
+    "predicted_level"
+  ]
+}

@@ -10,7 +10,7 @@ import {
 import { formatDistanceToNowStrict } from "date-fns";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { WardableBadge } from "@/components/bed-board/WardableBadge";
+import { WardableToggle } from "@/components/bed-board/WardableToggle";
 import { dayOfStay } from "@/lib/sampleData";
 
 const LEVEL_TONE = {
@@ -55,7 +55,7 @@ function OrganSupportIcons({ o }) {
   );
 }
 
-export default function BedCard({ bed, occupancy, onClick }) {
+export default function BedCard({ bed, occupancy, onClick, onWardableToggle, wardablePending }) {
   if (!occupancy) {
     return (
       <Card
@@ -120,9 +120,12 @@ export default function BedCard({ bed, occupancy, onClick }) {
       </div>
       <OrganSupportIcons o={occupancy} />
       <div className="mt-2 flex flex-wrap gap-1 items-center">
-        {occupancy.wardable && (
-          <WardableBadge className="text-[10px]" />
-        )}
+        <WardableToggle
+          wardable={occupancy.wardable}
+          wardableAt={occupancy.updated_date}
+          pending={wardablePending}
+          onToggle={() => onWardableToggle(occupancy)}
+        />
         {occupancy.isolation !== "none" && (
           <Badge variant="outline" className="text-[10px] gap-1">
             <ShieldAlert className="w-3 h-3" />

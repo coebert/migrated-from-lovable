@@ -1,0 +1,30 @@
+{
+  "name": "MessageTemplate",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "advice",
+        "decline",
+        "accept",
+        "handover"
+      ],
+      "default": "advice"
+    },
+    "body": {
+      "type": "string"
+    },
+    "active": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "required": [
+    "title",
+    "body"
+  ]
+}

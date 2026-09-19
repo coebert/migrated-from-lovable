@@ -1,0 +1,32 @@
+{
+  "name": "Notification",
+  "type": "object",
+  "properties": {
+    "referral_id": {
+      "type": "string",
+      "title": "Related referral"
+    },
+    "kind": {
+      "type": "string",
+      "enum": [
+        "new",
+        "status",
+        "note",
+        "updated",
+        "warning"
+      ],
+      "default": "new"
+    },
+    "message": {
+      "type": "string"
+    },
+    "read_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "kind",
+    "message"
+  ]
+}
