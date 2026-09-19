@@ -1,0 +1,44 @@
+{
+  "name": "ReferralTask",
+  "type": "object",
+  "properties": {
+    "referral_id": {
+      "type": "string",
+      "title": "Related referral"
+    },
+    "title": {
+      "type": "string"
+    },
+    "details": {
+      "type": "string"
+    },
+    "assigned_role": {
+      "type": "string",
+      "enum": [
+        "admin",
+        "clinician"
+      ],
+      "default": "clinician"
+    },
+    "due_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "open",
+        "done"
+      ],
+      "default": "open"
+    },
+    "completed_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "referral_id",
+    "title"
+  ]
+}

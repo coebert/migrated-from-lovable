@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeft, Save, Trash2 } from "lucide-react";
+import { ArrowLeft, Save, Trash2, Users } from "lucide-react";
 import { format } from "date-fns";
 import {
   STATUS_STYLES,
@@ -14,6 +14,9 @@ import {
   ADMISSION_URGENCY_PIP,
   ADMISSION_URGENCY_OPTIONS,
 } from "@/lib/referral-utils";
+import { ConsultantSelect } from "@/components/referrals/ConsultantSelect";
+import { Noteboard } from "@/components/referrals/Noteboard";
+import { TaskList } from "@/components/referrals/TaskList";
 
 const SEX_OPTIONS = ["male", "female", "other", "unknown"];
 
@@ -26,6 +29,7 @@ export default function ReferralDetail() {
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [form, setForm] = useState({});
+  const [currentUser, setCurrentUser] = useState(null);
 
   useEffect(() => {
     (async () => {
@@ -43,6 +47,7 @@ export default function ReferralDetail() {
         reason_for_referral: r.reason_for_referral ?? r.referral_reason ?? "",
         status: r.status ?? "pending",
         admission_urgency: r.admission_urgency ?? "",
+        accepting_consultant: r.accepting_consultant ?? "",
         discussed_with_consultant: r.discussed_with_consultant ?? "",
         taken_by: r.taken_by ?? "",
         outcome: r.outcome ?? "",
@@ -50,6 +55,10 @@ export default function ReferralDetail() {
       setLoading(false);
     })();
   }, [id]);
+
+  useEffect(() => {
+    base44.auth.me().then(setCurrentUser).catch(() => {});
+  }, []);
 
   const save = async () => {
     setSaving(true);
@@ -104,18 +113,17 @@ export default function ReferralDetail() {
   }
 
   const receivedAt = ref.referral_received_at || ref.created_at || ref.created_date;
+  const currentUserName = currentUser?.full_name || currentUser?.email || "";
 
   return (
-    <div className="max-w-3xl mx-auto space-y-4">
+    <div className="max-w-4xl mx-auto space-y-4">
       <div className="flex items-center justify-between gap-3">
         <Button variant="ghost" size="sm" onClick={() => navigate("/referrals")}>
           <ArrowLeft className="w-4 h-4 mr-1" /> Back
         </Button>
         <div className="flex items-center gap-2">
           {!editing && (
-            <Button variant="outline" size="sm" onClick={() => setEditing(true)}>
-              Edit
-            </Button>
+            <Button variant="outline" size="sm" onClick={() => setEditing(true)}>Edit</Button>
           )}
           <Button variant="outline" size="sm" disabled={deleting} onClick={softDelete}>
             <Trash2 className="w-4 h-4 mr-1" />
@@ -133,75 +141,101 @@ export default function ReferralDetail() {
         </Badge>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Referral details</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {!editing ? (
-            <div className="grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
-              <Field label="Hospital number" value={ref.hospital_number} />
-              <Field label="Age / Sex" value={`${ref.age ?? "?"} / ${ref.sex ?? "?"}`} />
-              <Field label="Current ward" value={ref.current_ward ?? ref.source_ward} />
-              <Field label="Current bed" value={ref.current_bed} />
-              <Field label="Referring specialty" value={ref.referring_specialty ?? ref.referring_team} />
-              <Field label="Received" value={receivedAt ? format(new Date(receivedAt), "dd/MM/yyyy HH:mm") : "—"} />
-              <Field label="Urgency" value={
-                ref.admission_urgency ? (
-                  <Badge variant="outline" className={`whitespace-nowrap ${ADMISSION_URGENCY_BADGE[ref.admission_urgency]}`}>
-                    <span className="font-mono mr-1">{ADMISSION_URGENCY_PIP[ref.admission_urgency]}</span>
-                    {ADMISSION_URGENCY_LABELS[ref.admission_urgency]}
-                  </Badge>
-                ) : ref.urgency ?? "—"
-              } />
-              <Field label="Taken by" value={ref.taken_by ?? ref.discussed_with_consultant} />
-              <div className="col-span-2">
-                <span className="text-xs text-muted-foreground block mb-1">Reason for referral</span>
-                <span className="text-sm">{ref.reason_for_referral ?? ref.referral_reason ?? "—"}</span>
-              </div>
-              {ref.outcome && (
+      {/* Admission capacity callout */}
+      <AdmissionCapacityCallout />
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Referral details</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {!editing ? (
+              <div className="grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
+                <Field label="Hospital number" value={ref.hospital_number} />
+                <Field label="Age / Sex" value={`${ref.age ?? "?"} / ${ref.sex ?? "?"}`} />
+                <Field label="Current ward" value={ref.current_ward ?? ref.source_ward} />
+                <Field label="Current bed" value={ref.current_bed} />
+                <Field label="Referring specialty" value={ref.referring_specialty ?? ref.referring_team} />
+                <Field label="Received" value={receivedAt ? format(new Date(receivedAt), "dd/MM/yyyy HH:mm") : "—"} />
+                <Field label="Urgency" value={
+                  ref.admission_urgency ? (
+                    <Badge variant="outline" className={`whitespace-nowrap ${ADMISSION_URGENCY_BADGE[ref.admission_urgency]}`}>
+                      <span className="font-mono mr-1">{ADMISSION_URGENCY_PIP[ref.admission_urgency]}</span>
+                      {ADMISSION_URGENCY_LABELS[ref.admission_urgency]}
+                    </Badge>
+                  ) : ref.urgency ?? "—"
+                } />
+                <Field label="Taken by" value={ref.taken_by ?? ref.discussed_with_consultant} />
+                <Field label="Accepting consultant" value={ref.accepting_consultant} />
+                <Field label="Discussed with" value={ref.discussed_with_consultant} />
                 <div className="col-span-2">
-                  <span className="text-xs text-muted-foreground block mb-1">Outcome</span>
-                  <span className="text-sm">{ref.outcome}</span>
+                  <span className="text-xs text-muted-foreground block mb-1">Reason for referral</span>
+                  <span className="text-sm">{ref.reason_for_referral ?? ref.referral_reason ?? "—"}</span>
                 </div>
-              )}
-            </div>
-          ) : (
-            <div className="space-y-3">
-              <div className="grid grid-cols-2 gap-3">
-                <InputField label="Patient initials" value={form.patient_initials} onChange={(v) => setForm({ ...form, patient_initials: v })} />
-                <InputField label="Hospital number" value={form.hospital_number} onChange={(v) => setForm({ ...form, hospital_number: v })} />
-                <InputField label="Age" type="number" value={form.age} onChange={(v) => setForm({ ...form, age: v })} />
-                <SelectField label="Sex" value={form.sex} options={SEX_OPTIONS} onChange={(v) => setForm({ ...form, sex: v })} />
-                <InputField label="Current ward" value={form.current_ward} onChange={(v) => setForm({ ...form, current_ward: v })} />
-                <InputField label="Current bed" value={form.current_bed} onChange={(v) => setForm({ ...form, current_bed: v })} />
-                <InputField label="Referring specialty" value={form.referring_specialty} onChange={(v) => setForm({ ...form, referring_specialty: v })} />
-                <SelectField label="Status" value={form.status} options={["pending", "accepted", "admitted", "declined"]} onChange={(v) => setForm({ ...form, status: v })} />
-                <SelectField label="Admission urgency" value={form.admission_urgency} options={["", ...ADMISSION_URGENCY_OPTIONS.map(o => o.value)]} optionLabels={["None", ...ADMISSION_URGENCY_OPTIONS.map(o => o.label)]} onChange={(v) => setForm({ ...form, admission_urgency: v })} />
-                <InputField label="Discussed with" value={form.discussed_with_consultant} onChange={(v) => setForm({ ...form, discussed_with_consultant: v })} />
-                <InputField label="Taken by" value={form.taken_by} onChange={(v) => setForm({ ...form, taken_by: v })} />
-                <InputField label="Outcome" value={form.outcome} onChange={(v) => setForm({ ...form, outcome: v })} />
+                {ref.outcome && (
+                  <div className="col-span-2">
+                    <span className="text-xs text-muted-foreground block mb-1">Outcome</span>
+                    <span className="text-sm">{ref.outcome}</span>
+                  </div>
+                )}
               </div>
-              <div>
-                <span className="text-xs text-muted-foreground block mb-1">Reason for referral</span>
-                <textarea
-                  className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm"
-                  rows={3}
-                  value={form.reason_for_referral}
-                  onChange={(e) => setForm({ ...form, reason_for_referral: e.target.value })}
-                />
+            ) : (
+              <div className="space-y-3">
+                <div className="grid grid-cols-2 gap-3">
+                  <InputField label="Patient initials" value={form.patient_initials} onChange={(v) => setForm({ ...form, patient_initials: v })} />
+                  <InputField label="Hospital number" value={form.hospital_number} onChange={(v) => setForm({ ...form, hospital_number: v })} />
+                  <InputField label="Age" type="number" value={form.age} onChange={(v) => setForm({ ...form, age: v })} />
+                  <SelectField label="Sex" value={form.sex} options={SEX_OPTIONS} onChange={(v) => setForm({ ...form, sex: v })} />
+                  <InputField label="Current ward" value={form.current_ward} onChange={(v) => setForm({ ...form, current_ward: v })} />
+                  <InputField label="Current bed" value={form.current_bed} onChange={(v) => setForm({ ...form, current_bed: v })} />
+                  <InputField label="Referring specialty" value={form.referring_specialty} onChange={(v) => setForm({ ...form, referring_specialty: v })} />
+                  <SelectField label="Status" value={form.status} options={["pending", "accepted", "admitted", "declined"]} onChange={(v) => setForm({ ...form, status: v })} />
+                  <SelectField label="Admission urgency" value={form.admission_urgency} options={["", ...ADMISSION_URGENCY_OPTIONS.map(o => o.value)]} optionLabels={["None", ...ADMISSION_URGENCY_OPTIONS.map(o => o.label)]} onChange={(v) => setForm({ ...form, admission_urgency: v })} />
+                  <InputField label="Taken by" value={form.taken_by} onChange={(v) => setForm({ ...form, taken_by: v })} />
+                  <InputField label="Outcome" value={form.outcome} onChange={(v) => setForm({ ...form, outcome: v })} />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-xs text-muted-foreground block mb-1">Accepting consultant</label>
+                    <ConsultantSelect
+                      value={form.accepting_consultant}
+                      onChange={(v) => setForm({ ...form, accepting_consultant: v ?? "" })}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-muted-foreground block mb-1">Discussed with</label>
+                    <ConsultantSelect
+                      value={form.discussed_with_consultant}
+                      onChange={(v) => setForm({ ...form, discussed_with_consultant: v ?? "" })}
+                    />
+                  </div>
+                </div>
+                <div>
+                  <span className="text-xs text-muted-foreground block mb-1">Reason for referral</span>
+                  <textarea
+                    className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm"
+                    rows={3}
+                    value={form.reason_for_referral}
+                    onChange={(e) => setForm({ ...form, reason_for_referral: e.target.value })}
+                  />
+                </div>
+                <div className="flex justify-end gap-2">
+                  <Button variant="outline" size="sm" onClick={() => setEditing(false)}>Cancel</Button>
+                  <Button size="sm" disabled={saving} onClick={save}>
+                    <Save className="w-4 h-4 mr-1" />
+                    {saving ? "Saving…" : "Save"}
+                  </Button>
+                </div>
               </div>
-              <div className="flex justify-end gap-2">
-                <Button variant="outline" size="sm" onClick={() => setEditing(false)}>Cancel</Button>
-                <Button size="sm" disabled={saving} onClick={save}>
-                  <Save className="w-4 h-4 mr-1" />
-                  {saving ? "Saving…" : "Save"}
-                </Button>
-              </div>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+            )}
+          </CardContent>
+        </Card>
+
+        <TaskList referralId={id} />
+      </div>
+
+      <Noteboard referralId={id} currentUserName={currentUserName} />
     </div>
   );
 }
@@ -242,6 +276,61 @@ function SelectField({ label, value, options, optionLabels, onChange }) {
           <option key={o} value={o}>{optionLabels ? optionLabels[i] : o}</option>
         ))}
       </select>
+    </div>
+  );
+}
+
+function AdmissionCapacityCallout() {
+  const [beds, setBeds] = useState([]);
+  const [occ, setOcc] = useState([]);
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const [b, o] = await Promise.all([
+          base44.entities.Bed.list(),
+          base44.entities.Occupancy.list("-admitted_at", 200),
+        ]);
+        setBeds(b);
+        setOcc(o);
+      } catch { /* ignore */ }
+      setLoaded(true);
+    })();
+  }, []);
+
+  const totalBeds = beds.length;
+  const occupied = occ.length;
+  const available = Math.max(0, totalBeds - occupied);
+
+  return (
+    <div className="rounded-md border bg-muted/30 p-3 text-sm">
+      <div className="flex items-center justify-between gap-2 mb-1.5">
+        <div className="flex items-center gap-2">
+          <Users className="w-4 h-4 text-muted-foreground" aria-hidden="true" />
+          <span className="font-medium">Unit capacity</span>
+        </div>
+      </div>
+      {!loaded ? (
+        <div className="text-xs text-muted-foreground">Loading capacity…</div>
+      ) : (
+        <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
+          <div>
+            <span className="tabular-nums font-semibold">{totalBeds}</span>
+            <span className="text-xs text-muted-foreground ml-1">total beds</span>
+          </div>
+          <div>
+            <span className="tabular-nums font-semibold">{occupied}</span>
+            <span className="text-xs text-muted-foreground ml-1">occupied</span>
+          </div>
+          <div>
+            <span className={`tabular-nums font-semibold ${available === 0 ? "text-destructive" : "text-emerald-700"}`}>
+              {available}
+            </span>
+            <span className="text-xs text-muted-foreground ml-1">available</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

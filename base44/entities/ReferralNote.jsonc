@@ -1,0 +1,26 @@
+{
+  "name": "ReferralNote",
+  "type": "object",
+  "properties": {
+    "referral_id": {
+      "type": "string",
+      "title": "Related referral"
+    },
+    "body": {
+      "type": "string",
+      "title": "Note text"
+    },
+    "author_name": {
+      "type": "string",
+      "title": "Author"
+    },
+    "edited_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "referral_id",
+    "body"
+  ]
+}

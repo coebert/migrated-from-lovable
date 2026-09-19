@@ -67,6 +67,10 @@
       "type": "string",
       "format": "date-time"
     },
+    "accepting_consultant": {
+      "type": "string",
+      "title": "Accepting consultant"
+    },
     "discussed_with_consultant": {
       "type": "string"
     },
