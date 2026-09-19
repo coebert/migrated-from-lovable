@@ -14,10 +14,10 @@ import { WardableBadge } from "@/components/bed-board/WardableBadge";
 import { dayOfStay } from "@/lib/sampleData";
 
 const LEVEL_TONE = {
-  0: "bg-emerald-500/10 text-emerald-700 border-emerald-500/30",
-  1: "bg-sky-500/10 text-sky-700 border-sky-500/30",
-  2: "bg-amber-500/10 text-amber-700 border-amber-500/30",
-  3: "bg-rose-500/10 text-rose-700 border-rose-500/30",
+  0: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/30",
+  1: "bg-sky-500/10 text-sky-700 dark:text-sky-400 border-sky-500/30",
+  2: "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/30",
+  3: "bg-rose-500/10 text-rose-700 dark:text-rose-400 border-rose-500/30",
 };
 
 const LEVEL_LABEL = {
@@ -64,6 +64,7 @@ export default function BedCard({ bed, occupancy, onClick }) {
         role="button"
         tabIndex={0}
         aria-label={`Empty bed ${bed.code} — click to admit`}
+        onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && onClick(bed)}
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1.5 text-sm font-semibold text-muted-foreground">
@@ -92,6 +93,7 @@ export default function BedCard({ bed, occupancy, onClick }) {
       role="button"
       tabIndex={0}
       aria-label={`Bed ${bed.code} — click to edit`}
+      onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && onClick(occupancy)}
     >
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-1.5 text-sm font-semibold">

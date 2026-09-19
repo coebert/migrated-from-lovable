@@ -3,18 +3,31 @@ import { base44 } from "@/api/base44Client";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Search, Plus, Filter } from "lucide-react";
+import { Search, Plus, Filter, Inbox as InboxIcon } from "lucide-react";
+import { format } from "date-fns";
 
-const URGENCY_TONE = {
-  emergency: "bg-rose-500/10 text-rose-700 border-rose-500/30",
-  urgent: "bg-amber-500/10 text-amber-700 border-amber-500/30",
-  routine: "bg-sky-500/10 text-sky-700 border-sky-500/30",
+const STATUS_STYLES = {
+  pending: "bg-warning/15 text-warning-foreground border-warning/30",
+  accepted: "bg-success/15 text-success border-success/30",
+  declined: "bg-destructive/10 text-destructive border-destructive/30",
 };
 
-const STATUS_TONE = {
-  pending: "bg-amber-500/10 text-amber-700 border-amber-500/30",
-  accepted: "bg-emerald-500/10 text-emerald-700 border-emerald-500/30",
-  declined: "bg-rose-500/10 text-rose-700 border-rose-500/30",
+const ROW_BG = {
+  pending: "bg-warning/[0.08]",
+  accepted: "bg-success/[0.08]",
+  declined: "bg-destructive/[0.06]",
+};
+
+const URGENCY_BADGE = {
+  emergency: "bg-red-100 text-red-800 border-red-300 dark:bg-red-950 dark:text-red-200",
+  urgent: "bg-orange-100 text-orange-800 border-orange-300 dark:bg-orange-950 dark:text-orange-200",
+  routine: "bg-amber-100 text-amber-900 border-amber-300 dark:bg-amber-950 dark:text-amber-200",
+};
+
+const URGENCY_PIP = {
+  emergency: "▲▲▲",
+  urgent: "▲▲",
+  routine: "▲",
 };
 
 const STATUSES = ["pending", "accepted", "declined"];
@@ -102,7 +115,7 @@ export default function Referrals() {
             <button
               key={s}
               onClick={() => setStatusFilter(s)}
-              className={`h-7 px-2.5 rounded-md text-xs font-medium border transition-colors ${
+              className={`h-7 px-2.5 rounded-md text-xs font-medium border transition-colors capitalize ${
                 statusFilter === s
                   ? "bg-primary text-primary-foreground border-primary"
                   : "bg-card text-muted-foreground border-border hover:bg-accent"
@@ -116,7 +129,7 @@ export default function Referrals() {
             <button
               key={u}
               onClick={() => setUrgencyFilter(u)}
-              className={`h-7 px-2.5 rounded-md text-xs font-medium border transition-colors ${
+              className={`h-7 px-2.5 rounded-md text-xs font-medium border transition-colors capitalize ${
                 urgencyFilter === u
                   ? "bg-primary text-primary-foreground border-primary"
                   : "bg-card text-muted-foreground border-border hover:bg-accent"
@@ -128,48 +141,151 @@ export default function Referrals() {
         </div>
       </Card>
 
-      <div className="space-y-2">
+      {/* Desktop table */}
+      <div className="hidden md:block border rounded-md bg-card overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm min-w-[720px]">
+            <thead className="bg-muted/50 text-xs uppercase text-muted-foreground">
+              <tr>
+                <th className="text-left px-3 py-2">Received</th>
+                <th className="text-left px-3 py-2">Hosp. no</th>
+                <th className="text-left px-3 py-2">Age</th>
+                <th className="text-left px-3 py-2">Location</th>
+                <th className="text-left px-3 py-2">Reason</th>
+                <th className="text-left px-3 py-2">Urgency</th>
+                <th className="text-left px-3 py-2">Status</th>
+                <th className="text-left px-3 py-2">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.length === 0 && (
+                <tr>
+                  <td colSpan={8} className="px-3 py-8">
+                    <div className="flex flex-col items-center justify-center text-center text-muted-foreground">
+                      <InboxIcon className="w-8 h-8 mb-2 opacity-50" />
+                      <p className="text-sm">No referrals match the current filters.</p>
+                    </div>
+                  </td>
+                </tr>
+              )}
+              {filtered.map((r) => (
+                <tr
+                  key={r.id}
+                  className={`border-t transition-colors duration-150 hover:bg-muted/40 ${ROW_BG[r.status] ?? ""}`}
+                >
+                  <td className="px-3 py-2 whitespace-nowrap text-muted-foreground">
+                    {r.created_at ? format(new Date(r.created_at), "dd/MM/yyyy HH:mm") : "—"}
+                  </td>
+                  <td className="px-3 py-2 font-mono text-xs">{r.hospital_number ?? "—"}</td>
+                  <td className="px-3 py-2">{r.age ?? "?"}</td>
+                  <td className="px-3 py-2">{r.source_ward ?? "—"}</td>
+                  <td className="px-3 py-2 max-w-xs">
+                    <div className="truncate">{r.referral_reason ?? "—"}</div>
+                    <div className="text-[10px] text-muted-foreground truncate">{r.referring_team}</div>
+                  </td>
+                  <td className="px-3 py-2">
+                    {r.urgency ? (
+                      <Badge variant="outline" className={`whitespace-nowrap ${URGENCY_BADGE[r.urgency] ?? ""}`}>
+                        <span className="font-mono mr-1 tracking-tighter">{URGENCY_PIP[r.urgency]}</span>
+                        <span className="capitalize">{r.urgency}</span>
+                      </Badge>
+                    ) : (
+                      <span className="text-xs text-muted-foreground">—</span>
+                    )}
+                  </td>
+                  <td className="px-3 py-2">
+                    <Badge variant="outline" className={`capitalize ${STATUS_STYLES[r.status] ?? ""}`}>
+                      {r.status}
+                    </Badge>
+                  </td>
+                  <td className="px-3 py-2">
+                    {r.status === "pending" && (
+                      <div className="flex items-center gap-1.5">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          disabled={acting === r.id}
+                          onClick={() => act(r.id, "declined")}
+                        >
+                          Decline
+                        </Button>
+                        <Button
+                          size="sm"
+                          disabled={acting === r.id}
+                          onClick={() => act(r.id, "accepted")}
+                        >
+                          Accept
+                        </Button>
+                      </div>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Mobile card list */}
+      <div className="md:hidden space-y-2">
         {filtered.length === 0 && (
           <Card className="p-8 text-center text-sm text-muted-foreground">
             No referrals match the current filters.
           </Card>
         )}
         {filtered.map((r) => (
-          <Card key={r.id} className="p-4 hover:bg-accent/30 transition-colors">
-            <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-              <div className="flex items-center gap-3 flex-1 min-w-0">
-                <Badge variant="outline" className={`font-mono text-[10px] ${URGENCY_TONE[r.urgency]}`}>
-                  {r.urgency}
-                </Badge>
-                <div className="min-w-0">
-                  <div className="text-sm font-medium truncate">
-                    {r.patient_initials}{" "}
-                    <span className="font-mono text-xs text-muted-foreground font-normal">
-                      · {r.hospital_number} · {r.age}y
-                    </span>
-                  </div>
-                  <div className="text-xs text-muted-foreground truncate">{r.referral_reason}</div>
-                  <div className="text-[11px] text-muted-foreground mt-0.5">
-                    From {r.source_ward} · {r.referring_team}
-                  </div>
+          <Card
+            key={r.id}
+            className={`p-3 hover:bg-muted/40 transition-colors ${ROW_BG[r.status] ?? ""}`}
+          >
+            <div className="flex items-start justify-between gap-2">
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium truncate">
+                    {r.patient_initials ?? "—"}
+                  </span>
+                  <span className="font-mono text-xs text-muted-foreground">
+                    · {r.hospital_number ?? "—"} · {r.age ?? "?"}y
+                  </span>
+                </div>
+                <div className="text-xs text-muted-foreground truncate mt-0.5">
+                  {r.referral_reason ?? "—"}
+                </div>
+                <div className="text-[11px] text-muted-foreground mt-0.5">
+                  From {r.source_ward ?? "—"} · {r.referring_team ?? "—"}
                 </div>
               </div>
-              <div className="flex items-center gap-2 shrink-0">
-                <Badge variant="outline" className={`text-[10px] ${STATUS_TONE[r.status]}`}>
+              <div className="flex flex-col items-end gap-1.5 shrink-0">
+                {r.urgency && (
+                  <Badge variant="outline" className={`text-[10px] ${URGENCY_BADGE[r.urgency] ?? ""}`}>
+                    <span className="font-mono mr-0.5">{URGENCY_PIP[r.urgency]}</span>
+                    <span className="capitalize">{r.urgency}</span>
+                  </Badge>
+                )}
+                <Badge variant="outline" className={`text-[10px] capitalize ${STATUS_STYLES[r.status] ?? ""}`}>
                   {r.status}
                 </Badge>
-                {r.status === "pending" && (
-                  <>
-                    <Button size="sm" variant="outline" disabled={acting === r.id} onClick={() => act(r.id, "declined")}>
-                      Decline
-                    </Button>
-                    <Button size="sm" disabled={acting === r.id} onClick={() => act(r.id, "accepted")}>
-                      Accept
-                    </Button>
-                  </>
-                )}
               </div>
             </div>
+            {r.status === "pending" && (
+              <div className="flex items-center gap-2 mt-2 pt-2 border-t">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={acting === r.id}
+                  onClick={() => act(r.id, "declined")}
+                >
+                  Decline
+                </Button>
+                <Button
+                  size="sm"
+                  disabled={acting === r.id}
+                  onClick={() => act(r.id, "accepted")}
+                >
+                  Accept
+                </Button>
+              </div>
+            )}
           </Card>
         ))}
       </div>
