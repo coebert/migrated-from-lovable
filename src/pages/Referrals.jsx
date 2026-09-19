@@ -7,6 +7,7 @@ import { QuickFilterChips } from "@/components/referrals/QuickFilterChips";
 import { ReferralsFilterToolbar } from "@/components/referrals/ReferralsFilterToolbar";
 import { ReferralsRows } from "@/components/referrals/ReferralsRows";
 import { ReferralsDeletedPanel } from "@/components/referrals/ReferralsDeletedPanel";
+import { CapacityBadge } from "@/components/referrals/CapacityBadge";
 import {
   computeTopWards,
   filterReferrals,
@@ -125,6 +126,8 @@ export default function Referrals() {
           </Button>
         </div>
       </div>
+
+      <CapacityBadge />
 
       <QuickFilterChips value={quick} onChange={setQuick} counts={quickCounts} />
 

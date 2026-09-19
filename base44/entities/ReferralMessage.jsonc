@@ -1,0 +1,46 @@
+{
+  "name": "ReferralMessage",
+  "type": "object",
+  "properties": {
+    "referral_id": {
+      "type": "string",
+      "title": "Related referral"
+    },
+    "channel": {
+      "type": "string",
+      "enum": [
+        "phone",
+        "bleep",
+        "email",
+        "secure_msg",
+        "in_person"
+      ],
+      "default": "phone"
+    },
+    "direction": {
+      "type": "string",
+      "enum": [
+        "outbound",
+        "inbound"
+      ],
+      "default": "outbound"
+    },
+    "recipient": {
+      "type": "string"
+    },
+    "body": {
+      "type": "string"
+    },
+    "sent_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "template_id": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "referral_id",
+    "body"
+  ]
+}

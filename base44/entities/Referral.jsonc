@@ -57,6 +57,18 @@
       "format": "date-time"
     },
     "outcome": {
+      "type": "string",
+      "enum": [
+        "admit_for_admission",
+        "review_on_ward",
+        "advice_given",
+        "declined"
+      ]
+    },
+    "decline_reason": {
+      "type": "string"
+    },
+    "reason_notes": {
       "type": "string"
     },
     "arrived_on_unit_at": {
@@ -64,6 +76,10 @@
       "format": "date-time"
     },
     "decision_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "first_seen_at": {
       "type": "string",
       "format": "date-time"
     },
@@ -76,6 +92,101 @@
     },
     "taken_by": {
       "type": "string"
+    },
+    "news2_score": {
+      "type": "number"
+    },
+    "ceiling_of_care": {
+      "type": "string",
+      "enum": [
+        "full_escalation",
+        "no_cpr",
+        "ward_based",
+        "symptom_control",
+        "not_documented"
+      ]
+    },
+    "reason_category": {
+      "type": "string",
+      "enum": [
+        "respiratory_failure",
+        "sepsis",
+        "shock",
+        "post_op",
+        "neurology",
+        "trauma",
+        "gi_bleed",
+        "metabolic",
+        "overdose",
+        "other"
+      ]
+    },
+    "frailty_score": {
+      "type": "number"
+    },
+    "anticipated_interventions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "infection_status": {
+      "type": "string",
+      "enum": [
+        "none",
+        "suspected",
+        "confirmed",
+        "unknown"
+      ]
+    },
+    "infection_organism": {
+      "type": "string"
+    },
+    "weight_kg": {
+      "type": "number"
+    },
+    "allergies": {
+      "type": "string"
+    },
+    "resus_status": {
+      "type": "string",
+      "enum": [
+        "for_cpr",
+        "dnacpr",
+        "not_documented"
+      ]
+    },
+    "needs_ward_review": {
+      "type": "boolean",
+      "default": false
+    },
+    "for_ongoing_ccot_review": {
+      "type": "boolean",
+      "default": false
+    },
+    "ward_review_timeframe": {
+      "type": "string",
+      "enum": [
+        "12h",
+        "24h",
+        "48h",
+        "72h",
+        "weekly",
+        "prn"
+      ]
+    },
+    "past_medical_history": {
+      "type": "string"
+    },
+    "baseline_function": {
+      "type": "string"
+    },
+    "dnacpr_respect": {
+      "type": "string"
+    },
+    "consultant_to_consultant_only": {
+      "type": "boolean",
+      "default": false
     },
     "deleted_at": {
       "type": "string",
