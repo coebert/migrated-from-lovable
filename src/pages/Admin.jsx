@@ -21,8 +21,9 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { Plus, ShieldCheck, Bed, Pencil, Trash2 } from "lucide-react";
+import { Plus, ShieldCheck, Bed, Pencil, Trash2, Network } from "lucide-react";
 import { format } from "date-fns";
+import BridgePanel from "@/components/admin/BridgePanel";
 
 const TEMPLATE_CATEGORIES = [
   { value: "advice", label: "Advice" },
@@ -45,6 +46,7 @@ export default function Admin() {
           <TabsTrigger value="beds">Beds</TabsTrigger>
           <TabsTrigger value="templates">Templates</TabsTrigger>
           <TabsTrigger value="audit">Audit log</TabsTrigger>
+          <TabsTrigger value="bridge">Bridge</TabsTrigger>
         </TabsList>
 
         <TabsContent value="users" className="mt-4 space-y-6">
@@ -61,6 +63,10 @@ export default function Admin() {
 
         <TabsContent value="audit" className="mt-4">
           <AuditPanel />
+        </TabsContent>
+
+        <TabsContent value="bridge" className="mt-4">
+          <BridgePanel />
         </TabsContent>
       </Tabs>
     </div>
