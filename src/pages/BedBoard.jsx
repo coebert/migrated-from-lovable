@@ -1,17 +1,11 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { base44 } from "@/api/base44Client";
 import { useIsMobile } from "@/hooks/use-mobile";
 import BedCard from "@/components/BedCard";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Activity, Bed, AlertTriangle, TrendingUp, ScrollText } from "lucide-react";
-import { BEDS, OCCUPANCIES, REFERRALS, dayOfStay } from "@/lib/sampleData";
-
-const LEVEL_LABEL = {
-  0: "Level 0 — ward-level",
-  1: "Level 1 — at risk",
-  2: "Level 2 — HDU",
-  3: "Level 3 — ICU",
-};
+import { dayOfStay } from "@/lib/sampleData";
 
 function CapacityStrip({ total, occupied }) {
   const pct = total ? Math.round((occupied / total) * 100) : 0;
@@ -48,24 +42,40 @@ function MetricRow({ icon: Icon, label, value, tone }) {
 
 export default function BedBoard() {
   const isMobile = useIsMobile();
-  const [selected, setSelected] = useState(null);
+  const [beds, setBeds] = useState([]);
+  const [occupancies, setOccupancies] = useState([]);
+  const [referralCount, setReferralCount] = useState(0);
+  const [loading, setLoading] = useState(true);
+
+  const load = async () => {
+    const [b, o, r] = await Promise.all([
+      base44.entities.Bed.list(),
+      base44.entities.Occupancy.list(),
+      base44.entities.Referral.filter({ status: "pending" }),
+    ]);
+    setBeds(b);
+    setOccupancies(o);
+    setReferralCount(r.length);
+    setLoading(false);
+  };
+
+  useEffect(() => { load(); }, []);
 
   const liveByBed = useMemo(() => {
     const m = new Map();
-    for (const o of OCCUPANCIES) m.set(o.bed_id, o);
+    for (const o of occupancies) m.set(o.bed_id, o);
     return m;
-  }, []);
+  }, [occupancies]);
 
-  const total = BEDS.length;
-  const occupied = OCCUPANCIES.length;
-  const level3 = OCCUPANCIES.filter((o) => o.level === 3).length;
-  const isolated = OCCUPANCIES.filter((o) => o.isolation !== "none").length;
-  const vented = OCCUPANCIES.filter((o) => o.ventilated).length;
-  const pending = REFERRALS.filter((r) => r.status === "pending").length;
+  const total = beds.length;
+  const occupied = occupancies.length;
+  const level3 = occupancies.filter((o) => o.level === 3).length;
+  const isolated = occupancies.filter((o) => o.isolation !== "none").length;
+  const vented = occupancies.filter((o) => o.ventilated).length;
 
   const logs = [
     { t: "2m ago", text: "Bed CC-03 — RRT circuit changed" },
-    { t: "18m ago", text: "Referral r1 accepted by Dr Patel" },
+    { t: "18m ago", text: "Referral accepted by Dr Patel" },
     { t: "41m ago", text: "Bed CC-10 — vasopressors weaned" },
     { t: "1h ago", text: "Bed CC-06 — discharged to ward" },
     { t: "2h ago", text: "Bed CC-14 — admitted from theatre" },
@@ -76,19 +86,19 @@ export default function BedBoard() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="font-heading font-semibold text-base">Radnor Critical Care Unit</h2>
-          <p className="text-xs text-muted-foreground">15 beds · 9 occupied · 6 available</p>
+          <p className="text-xs text-muted-foreground">{total} beds · {occupied} occupied · {total - occupied} available</p>
         </div>
         <Badge variant="outline" className="font-mono text-xs">{occupied}/{total}</Badge>
       </div>
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
-        {[...BEDS]
+        {[...beds]
           .sort((a, b) => a.sort_order - b.sort_order)
           .map((b) => (
             <BedCard
               key={b.id}
               bed={b}
               occupancy={liveByBed.get(b.id)}
-              onClick={(o) => setSelected(o)}
+              onClick={() => {}}
             />
           ))}
       </div>
@@ -104,7 +114,7 @@ export default function BedBoard() {
           <MetricRow icon={Bed} label="Level 3 (ICU)" value={level3} tone="text-rose-600" />
           <MetricRow icon={Activity} label="Ventilated" value={vented} tone="text-sky-600" />
           <MetricRow icon={AlertTriangle} label="Isolated" value={isolated} tone="text-amber-600" />
-          <MetricRow icon={TrendingUp} label="Pending referrals" value={pending} tone="text-primary" />
+          <MetricRow icon={TrendingUp} label="Pending referrals" value={referralCount} tone="text-primary" />
         </div>
       </Card>
 
@@ -124,6 +134,14 @@ export default function BedBoard() {
       </Card>
     </div>
   );
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <div className="w-8 h-8 border-4 border-slate-200 border-t-primary rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   if (isMobile) {
     return (

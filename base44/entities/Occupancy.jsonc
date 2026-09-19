@@ -1,0 +1,76 @@
+{
+  "name": "Occupancy",
+  "type": "object",
+  "properties": {
+    "bed_id": {
+      "type": "string",
+      "title": "Bed"
+    },
+    "patient_initials": {
+      "type": "string"
+    },
+    "hospital_number": {
+      "type": "string"
+    },
+    "age": {
+      "type": "number"
+    },
+    "admitting_consultant": {
+      "type": "string"
+    },
+    "admitted_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "level": {
+      "type": "number",
+      "default": 0
+    },
+    "ventilated": {
+      "type": "boolean",
+      "default": false
+    },
+    "nippv_cpap": {
+      "type": "boolean",
+      "default": false
+    },
+    "hfno": {
+      "type": "boolean",
+      "default": false
+    },
+    "vasopressors": {
+      "type": "boolean",
+      "default": false
+    },
+    "renal_replacement": {
+      "type": "boolean",
+      "default": false
+    },
+    "tracheostomy": {
+      "type": "boolean",
+      "default": false
+    },
+    "wardable": {
+      "type": "boolean",
+      "default": false
+    },
+    "isolation": {
+      "type": "string",
+      "enum": [
+        "none",
+        "contact",
+        "droplet",
+        "airborne"
+      ],
+      "default": "none"
+    },
+    "predicted_discharge_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "bed_id",
+    "patient_initials"
+  ]
+}

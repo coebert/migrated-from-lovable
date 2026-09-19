@@ -1,0 +1,50 @@
+{
+  "name": "Referral",
+  "type": "object",
+  "properties": {
+    "patient_initials": {
+      "type": "string"
+    },
+    "hospital_number": {
+      "type": "string"
+    },
+    "age": {
+      "type": "number"
+    },
+    "urgency": {
+      "type": "string",
+      "enum": [
+        "emergency",
+        "urgent",
+        "routine"
+      ],
+      "default": "routine"
+    },
+    "referral_reason": {
+      "type": "string"
+    },
+    "source_ward": {
+      "type": "string"
+    },
+    "referring_team": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "accepted",
+        "declined"
+      ],
+      "default": "pending"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "patient_initials",
+    "referral_reason"
+  ]
+}

@@ -1,9 +1,9 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { base44 } from "@/api/base44Client";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Search, Plus, Filter } from "lucide-react";
-import { REFERRALS } from "@/lib/sampleData";
 
 const URGENCY_TONE = {
   emergency: "bg-rose-500/10 text-rose-700 border-rose-500/30",
@@ -24,7 +24,17 @@ export default function Referrals() {
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("pending");
   const [urgencyFilter, setUrgencyFilter] = useState("all");
-  const [list, setList] = useState(REFERRALS);
+  const [list, setList] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [acting, setActing] = useState(null);
+
+  const load = async () => {
+    const items = await base44.entities.Referral.list("-created_date", 200);
+    setList(items);
+    setLoading(false);
+  };
+
+  useEffect(() => { load(); }, []);
 
   const filtered = useMemo(() => {
     return list
@@ -36,8 +46,7 @@ export default function Referrals() {
               .toLowerCase()
               .includes(query.toLowerCase())
           : true
-      )
-      .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+      );
   }, [list, query, statusFilter, urgencyFilter]);
 
   const counts = useMemo(() => {
@@ -46,8 +55,20 @@ export default function Referrals() {
     return c;
   }, [list]);
 
-  const act = (id, status) =>
+  const act = async (id, status) => {
+    setActing(id);
+    await base44.entities.Referral.update(id, { status });
     setList((cur) => cur.map((r) => (r.id === id ? { ...r, status } : r)));
+    setActing(null);
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <div className="w-8 h-8 border-4 border-slate-200 border-t-primary rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">
@@ -139,10 +160,10 @@ export default function Referrals() {
                 </Badge>
                 {r.status === "pending" && (
                   <>
-                    <Button size="sm" variant="outline" onClick={() => act(r.id, "declined")}>
+                    <Button size="sm" variant="outline" disabled={acting === r.id} onClick={() => act(r.id, "declined")}>
                       Decline
                     </Button>
-                    <Button size="sm" onClick={() => act(r.id, "accepted")}>
+                    <Button size="sm" disabled={acting === r.id} onClick={() => act(r.id, "accepted")}>
                       Accept
                     </Button>
                   </>
