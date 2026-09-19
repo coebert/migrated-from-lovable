@@ -42,10 +42,10 @@ export default function Admin() {
     ]);
 
   return (
-    <div className="space-y-4 max-w-5xl">
+    <div className="max-w-6xl mx-auto space-y-6">
       <div>
-        <h2 className="font-heading font-semibold text-lg">Admin</h2>
-        <p className="text-xs text-muted-foreground">Team members, beds, templates & audit</p>
+        <h1 className="text-2xl font-semibold tracking-tight">Admin</h1>
+        <p className="text-sm text-muted-foreground">Team members, beds, templates & audit</p>
       </div>
 
       <Tabs defaultValue="users">

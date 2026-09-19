@@ -9,17 +9,29 @@ import {
   ShieldCheck,
   Search,
   Bell,
-  Menu,
-  X,
+  PanelLeft,
   Activity,
+  Heart,
 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import {
+  Sidebar,
+  SidebarProvider,
+  SidebarHeader,
+  SidebarContent,
+  SidebarMenu,
+  SidebarMenuItem,
+  SidebarMenuButton,
+  SidebarFooter,
+  SidebarTrigger,
+  SidebarInset,
+} from "@/components/ui/sidebar";
 
 const NAV = [
   { to: "/", label: "Bed board", icon: Bed, end: true },
   { to: "/referrals", label: "Referrals", icon: Forward },
   { to: "/inbox", label: "Inbox", icon: Mail },
-  { to: "/postop", label: "Post-op", icon: CalendarClock },
+  { to: "/postop", label: "Post-op bookings", icon: CalendarClock },
   { to: "/analytics", label: "Analytics", icon: BarChart3 },
   { to: "/admin", label: "Admin", icon: ShieldCheck },
 ];
@@ -34,72 +46,64 @@ const PAGE_TITLE = {
 };
 
 export default function Layout() {
-  const isMobile = useIsMobile();
   const location = useLocation();
   const [alertsOn, setAlertsOn] = useState(true);
-  const [sheetOpen, setSheetOpen] = useState(false);
 
   const active = NAV.find((n) =>
     n.to === "/" ? location.pathname === "/" : location.pathname.startsWith(n.to)
   );
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      {/* Desktop vertical nav rail */}
-      {!isMobile && (
-        <aside className="fixed inset-y-0 left-0 w-16 border-r border-border bg-card flex flex-col items-center py-4 z-30">
-          <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-primary text-primary-foreground font-display font-bold text-sm">
-            SD
+    <SidebarProvider>
+      <Sidebar collapsible="icon">
+        <SidebarHeader>
+          <div className="flex items-center gap-2 px-2 py-1.5">
+            <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary text-primary-foreground font-display font-bold text-sm shrink-0">
+              SD
+            </div>
+            <span className="font-heading font-semibold text-sm group-data-[collapsible=icon]:hidden">
+              SDH Critical Care
+            </span>
           </div>
-          <nav className="mt-8 flex flex-col gap-1 flex-1">
+        </SidebarHeader>
+        <SidebarContent>
+          <SidebarMenu>
             {NAV.map((item) => {
               const Icon = item.icon;
               return (
-                <NavLink
-                  key={item.to}
-                  to={item.to}
-                  end={item.end}
-                  className={({ isActive }) =>
-                    `relative flex items-center justify-center w-10 h-10 rounded-lg transition-colors ${
-                      isActive
-                        ? "text-primary"
-                        : "text-muted-foreground hover:text-foreground hover:bg-accent"
-                    }`
-                  }
-                  title={item.label}
-                >
-                  {({ isActive }) => (
-                    <>
-                      {isActive && (
-                        <span className="absolute left-0 top-1/2 -translate-y-1/2 h-6 w-0.5 rounded-r bg-primary" />
-                      )}
-                      <Icon className="w-5 h-5" />
-                    </>
-                  )}
-                </NavLink>
+                <SidebarMenuItem key={item.to}>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={
+                      item.to === "/"
+                        ? location.pathname === "/"
+                        : location.pathname.startsWith(item.to)
+                    }
+                    tooltip={item.label}
+                  >
+                    <NavLink to={item.to} end={item.end}>
+                      <Icon className="w-4 h-4" />
+                      <span>{item.label}</span>
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
               );
             })}
-          </nav>
-          <div className="flex flex-col items-center gap-2">
-            <div className="flex items-center gap-1 text-emerald-600" title="System operational">
-              <Activity className="w-4 h-4" />
-            </div>
-            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+          </SidebarMenu>
+        </SidebarContent>
+        <SidebarFooter>
+          <div className="flex items-center gap-2 px-2 py-1.5 text-emerald-600 group-data-[collapsible=icon]:justify-center">
+            <Activity className="w-4 h-4" />
+            <span className="text-xs font-medium group-data-[collapsible=icon]:hidden">
+              System operational
+            </span>
           </div>
-        </aside>
-      )}
+        </SidebarFooter>
+      </Sidebar>
 
-      {/* Main column */}
-      <div className={!isMobile ? "ml-16" : ""}>
-        {/* Top contextual header */}
+      <SidebarInset>
         <header className="sticky top-0 z-20 h-14 border-b border-border bg-card/80 backdrop-blur flex items-center gap-3 px-4">
-          {isMobile && (
-            <div className="flex items-center gap-2">
-              <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary text-primary-foreground font-display font-bold text-xs">
-                SD
-              </div>
-            </div>
-          )}
+          <SidebarTrigger className="h-7 w-7" />
           <h1 className="font-heading font-semibold text-[0.95rem] text-foreground truncate">
             {PAGE_TITLE[active?.to] ?? "SDH Critical Care"}
           </h1>
@@ -122,77 +126,13 @@ export default function Layout() {
             >
               <Bell className="w-4 h-4" />
             </button>
-            <button
-              onClick={() => setSheetOpen(true)}
-              className="hidden md:inline-flex items-center gap-1.5 h-9 px-3 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:opacity-90"
-            >
-              <Menu className="w-4 h-4" />
-              Actions
-            </button>
           </div>
         </header>
 
-        {/* Page content */}
-        <main className="px-4 sm:px-6 py-4 sm:py-6 pb-20 md:pb-6">
+        <main className="p-4 sm:p-6">
           <Outlet />
         </main>
-      </div>
-
-      {/* Mobile bottom navigation */}
-      {isMobile && (
-        <nav className="fixed bottom-0 inset-x-0 z-30 h-12 border-t border-border bg-card flex items-center justify-around px-2">
-          {NAV.slice(0, 5).map((item) => {
-            const Icon = item.icon;
-            return (
-              <NavLink
-                key={item.to}
-                to={item.to}
-                end={item.end}
-                className={({ isActive }) =>
-                  `flex flex-col items-center justify-center gap-0.5 flex-1 h-full text-[0.625rem] font-medium ${
-                    isActive ? "text-primary" : "text-muted-foreground"
-                  }`
-                }
-              >
-                <Icon className="w-5 h-5" />
-                {item.label.split(" ")[0]}
-              </NavLink>
-            );
-          })}
-        </nav>
-      )}
-
-      {/* Quick actions bottom sheet (mobile) */}
-      {isMobile && sheetOpen && (
-        <div className="fixed inset-0 z-40 flex items-end">
-          <div className="absolute inset-0 bg-black/40" onClick={() => setSheetOpen(false)} />
-          <div className="relative w-full rounded-t-xl border-t border-border bg-card p-4 pb-6">
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="font-heading font-semibold text-sm">Quick actions</h2>
-              <button onClick={() => setSheetOpen(false)} className="p-1" aria-label="Close">
-                <X className="w-5 h-5 text-muted-foreground" />
-              </button>
-            </div>
-            <div className="grid grid-cols-2 gap-2">
-              {NAV.map((item) => {
-                const Icon = item.icon;
-                return (
-                  <NavLink
-                    key={item.to}
-                    to={item.to}
-                    end={item.end}
-                    onClick={() => setSheetOpen(false)}
-                    className="flex items-center gap-2 rounded-lg border border-border p-3 text-sm font-medium hover:bg-accent"
-                  >
-                    <Icon className="w-4 h-4 text-primary" />
-                    {item.label}
-                  </NavLink>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
+      </SidebarInset>
+    </SidebarProvider>
   );
 }

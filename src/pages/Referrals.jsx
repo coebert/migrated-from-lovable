@@ -71,15 +71,15 @@ export default function Referrals() {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="max-w-5xl mx-auto space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h2 className="font-heading font-semibold text-lg">Referrals</h2>
-          <p className="text-xs text-muted-foreground">
+          <h1 className="text-2xl font-semibold tracking-tight">Referrals</h1>
+          <p className="text-sm text-muted-foreground">
             {list.length} total · {counts.pending} pending · {counts.accepted} accepted · {counts.declined} declined
           </p>
         </div>
-        <Button className="self-start sm:self-auto">
+        <Button>
           <Plus className="w-4 h-4 mr-1" /> New referral
         </Button>
       </div>

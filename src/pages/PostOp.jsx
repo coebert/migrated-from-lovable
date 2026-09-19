@@ -18,11 +18,11 @@ export default function PostOp() {
     setItems((cur) => cur.map((p) => (p.id === id ? { ...p, status: "confirmed" } : p)));
 
   return (
-    <div className="space-y-4">
+    <div className="max-w-5xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="font-heading font-semibold text-lg">Post-op bookings</h2>
-          <p className="text-xs text-muted-foreground">{items.length} upcoming · reserve HDU beds post-theatre</p>
+          <h1 className="text-2xl font-semibold tracking-tight">Post-op bookings</h1>
+          <p className="text-sm text-muted-foreground">{items.length} upcoming · reserve HDU beds post-theatre</p>
         </div>
         <Button>
           <Plus className="w-4 h-4 mr-1" /> New booking

@@ -64,10 +64,10 @@ function KpiCard({ icon: Icon, label, value, delta, up }) {
 
 export default function Analytics() {
   return (
-    <div className="space-y-6">
+    <div className="max-w-7xl mx-auto space-y-6">
       <div>
-        <h2 className="font-heading font-semibold text-lg">Analytics</h2>
-        <p className="text-xs text-muted-foreground">Unit performance · last 7 days</p>
+        <h1 className="text-2xl font-semibold tracking-tight">Analytics</h1>
+        <p className="text-sm text-muted-foreground">Unit performance · last 7 days</p>
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">

@@ -7,8 +7,10 @@ import {
   Stethoscope,
   Wind,
 } from "lucide-react";
+import { formatDistanceToNowStrict } from "date-fns";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { WardableBadge } from "@/components/bed-board/WardableBadge";
 import { dayOfStay } from "@/lib/sampleData";
 
 const LEVEL_TONE = {
@@ -18,23 +20,32 @@ const LEVEL_TONE = {
   3: "bg-rose-500/10 text-rose-700 border-rose-500/30",
 };
 
+const LEVEL_LABEL = {
+  0: "Level 0 — ward-level care",
+  1: "Level 1 — at risk of deterioration",
+  2: "Level 2 — HDU care",
+  3: "Level 3 — ICU care",
+};
+
 const ISOLATION_LABEL = { contact: "Contact", droplet: "Droplet", airborne: "Airborne" };
 
 function OrganSupportIcons({ o }) {
   const items = [];
-  if (o.ventilated) items.push({ key: "vent", label: "Vent", icon: <Wind className="w-3 h-3" /> });
-  if (o.nippv_cpap) items.push({ key: "niv", label: "NIV", icon: <Wind className="w-3 h-3" /> });
-  if (o.hfno) items.push({ key: "hfno", label: "HFNO", icon: <Wind className="w-3 h-3" /> });
-  if (o.vasopressors) items.push({ key: "vaso", label: "Vaso", icon: <Activity className="w-3 h-3" /> });
-  if (o.renal_replacement) items.push({ key: "rrt", label: "RRT", icon: <Droplets className="w-3 h-3" /> });
-  if (o.tracheostomy) items.push({ key: "trach", label: "Trach", icon: <Stethoscope className="w-3 h-3" /> });
+  if (o.ventilated) items.push({ key: "vent", label: "Ventilated", icon: <Wind className="w-3.5 h-3.5" /> });
+  if (o.nippv_cpap) items.push({ key: "niv", label: "NIV/CPAP", icon: <Wind className="w-3.5 h-3.5" /> });
+  if (o.hfno) items.push({ key: "hfno", label: "HFNO", icon: <Wind className="w-3.5 h-3.5" /> });
+  if (o.vasopressors) items.push({ key: "vaso", label: "Vasopressors", icon: <Activity className="w-3.5 h-3.5" /> });
+  if (o.renal_replacement) items.push({ key: "rrt", label: "RRT", icon: <Droplets className="w-3.5 h-3.5" /> });
+  if (o.tracheostomy) items.push({ key: "trach", label: "Tracheostomy", icon: <Stethoscope className="w-3.5 h-3.5" /> });
   if (!items.length) return null;
   return (
     <div className="flex flex-wrap gap-1 mt-2">
       {items.map((i) => (
         <span
           key={i.key}
-          className="inline-flex items-center gap-0.5 text-[11px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground border border-border"
+          title={i.label}
+          aria-label={i.label}
+          className="inline-flex items-center gap-1 text-[11px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground border"
         >
           {i.icon}
           {i.label}
@@ -70,8 +81,8 @@ export default function BedCard({ bed, occupancy, onClick }) {
     );
   }
 
-  const dcIn = occupancy.predicted_discharge_at
-    ? `${Math.round((new Date(occupancy.predicted_discharge_at) - Date.now()) / 3600000)}h`
+  const predicted = occupancy.predicted_discharge_at
+    ? formatDistanceToNowStrict(new Date(occupancy.predicted_discharge_at), { addSuffix: true })
     : null;
 
   return (
@@ -89,15 +100,16 @@ export default function BedCard({ bed, occupancy, onClick }) {
         </div>
         <Badge
           variant="outline"
-          className={`text-[10px] font-mono ${LEVEL_TONE[occupancy.level] ?? ""}`}
-          title={`Level ${occupancy.level}`}
+          className={`text-[10px] ${LEVEL_TONE[occupancy.level] ?? ""}`}
+          title={LEVEL_LABEL[occupancy.level] ?? `Level ${occupancy.level}`}
+          aria-label={LEVEL_LABEL[occupancy.level] ?? `Level ${occupancy.level}`}
         >
           L{occupancy.level}
         </Badge>
       </div>
-      <div className="mt-1 text-sm truncate font-medium">
+      <div className="mt-1 text-sm truncate">
         {occupancy.patient_initials || "—"}{" "}
-        <span className="text-xs text-muted-foreground font-mono font-normal">
+        <span className="text-xs text-muted-foreground">
           {occupancy.hospital_number ? `· ${occupancy.hospital_number}` : ""}
         </span>
       </div>
@@ -107,9 +119,7 @@ export default function BedCard({ bed, occupancy, onClick }) {
       <OrganSupportIcons o={occupancy} />
       <div className="mt-2 flex flex-wrap gap-1 items-center">
         {occupancy.wardable && (
-          <Badge variant="outline" className="text-[10px] bg-violet-500/10 text-violet-700 border-violet-500/30">
-            Wardable
-          </Badge>
+          <WardableBadge className="text-[10px]" />
         )}
         {occupancy.isolation !== "none" && (
           <Badge variant="outline" className="text-[10px] gap-1">
@@ -117,8 +127,10 @@ export default function BedCard({ bed, occupancy, onClick }) {
             {ISOLATION_LABEL[occupancy.isolation] ?? occupancy.isolation}
           </Badge>
         )}
-        {dcIn && (
-          <span className="text-[11px] text-muted-foreground font-mono">D/C {dcIn}</span>
+        {predicted && (
+          <span className="text-[11px] text-muted-foreground">
+            D/C {predicted}
+          </span>
         )}
       </div>
     </Card>

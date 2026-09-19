@@ -3,7 +3,6 @@ import { base44 } from "@/api/base44Client";
 import { useIsMobile } from "@/hooks/use-mobile";
 import BedCard from "@/components/BedCard";
 import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Activity, Bed, AlertTriangle, TrendingUp, ScrollText } from "lucide-react";
 import { dayOfStay } from "@/lib/sampleData";
 
@@ -83,25 +82,28 @@ export default function BedBoard() {
 
   const grid = (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="font-heading font-semibold text-base">Radnor Critical Care Unit</h2>
-          <p className="text-xs text-muted-foreground">{total} beds · {occupied} occupied · {total - occupied} available</p>
+      <section>
+        <h2 className="text-sm font-semibold text-muted-foreground mb-2">
+          Radnor Critical Care Unit
+        </h2>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+          {[...beds]
+            .sort((a, b) => a.sort_order - b.sort_order)
+            .map((b) => (
+              <BedCard
+                key={b.id}
+                bed={b}
+                occupancy={liveByBed.get(b.id)}
+                onClick={() => {}}
+              />
+            ))}
+          {beds.length === 0 && (
+            <div className="col-span-full text-sm text-muted-foreground">
+              No beds configured. Admins can add beds in the register.
+            </div>
+          )}
         </div>
-        <Badge variant="outline" className="font-mono text-xs">{occupied}/{total}</Badge>
-      </div>
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
-        {[...beds]
-          .sort((a, b) => a.sort_order - b.sort_order)
-          .map((b) => (
-            <BedCard
-              key={b.id}
-              bed={b}
-              occupancy={liveByBed.get(b.id)}
-              onClick={() => {}}
-            />
-          ))}
-      </div>
+      </section>
     </div>
   );
 
@@ -145,7 +147,7 @@ export default function BedBoard() {
 
   if (isMobile) {
     return (
-      <div className="space-y-4">
+      <div className="max-w-7xl mx-auto space-y-4">
         {grid}
         {sidePanel}
       </div>
@@ -153,7 +155,7 @@ export default function BedBoard() {
   }
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-[68fr_32fr] gap-6">
+    <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-[68fr_32fr] gap-6">
       <div>{grid}</div>
       <div>{sidePanel}</div>
     </div>

@@ -16,10 +16,10 @@ export default function Inbox() {
   };
 
   return (
-    <div className="space-y-4 max-w-3xl">
+    <div className="max-w-3xl mx-auto space-y-6">
       <div>
-        <h2 className="font-heading font-semibold text-lg">Inbox</h2>
-        <p className="text-xs text-muted-foreground">{items.length} messages · {unread} unread</p>
+        <h1 className="text-2xl font-semibold tracking-tight">Inbox</h1>
+        <p className="text-sm text-muted-foreground">{items.length} messages · {unread} unread</p>
       </div>
       <div className="space-y-2">
         {items.map((m) => {
