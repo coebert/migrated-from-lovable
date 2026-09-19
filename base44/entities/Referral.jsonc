@@ -11,6 +11,76 @@
     "age": {
       "type": "number"
     },
+    "sex": {
+      "type": "string",
+      "enum": [
+        "male",
+        "female",
+        "other",
+        "unknown"
+      ]
+    },
+    "current_ward": {
+      "type": "string"
+    },
+    "current_bed": {
+      "type": "string"
+    },
+    "referring_specialty": {
+      "type": "string"
+    },
+    "reason_for_referral": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "accepted",
+        "admitted",
+        "declined"
+      ],
+      "default": "pending"
+    },
+    "admission_urgency": {
+      "type": "string",
+      "enum": [
+        "within_15_min",
+        "within_30_min",
+        "within_1_hour",
+        "within_1_2_hours",
+        "not_admitting"
+      ]
+    },
+    "referral_received_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "outcome": {
+      "type": "string"
+    },
+    "arrived_on_unit_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "decision_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "discussed_with_consultant": {
+      "type": "string"
+    },
+    "taken_by": {
+      "type": "string"
+    },
+    "deleted_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "is_test": {
+      "type": "boolean",
+      "default": false
+    },
     "urgency": {
       "type": "string",
       "enum": [
@@ -29,15 +99,6 @@
     "referring_team": {
       "type": "string"
     },
-    "status": {
-      "type": "string",
-      "enum": [
-        "pending",
-        "accepted",
-        "declined"
-      ],
-      "default": "pending"
-    },
     "created_at": {
       "type": "string",
       "format": "date-time"
@@ -45,6 +106,6 @@
   },
   "required": [
     "patient_initials",
-    "referral_reason"
+    "reason_for_referral"
   ]
 }
