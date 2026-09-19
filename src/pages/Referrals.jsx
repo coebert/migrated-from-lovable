@@ -8,6 +8,7 @@ import { ReferralsFilterToolbar } from "@/components/referrals/ReferralsFilterTo
 import { ReferralsRows } from "@/components/referrals/ReferralsRows";
 import { ReferralsDeletedPanel } from "@/components/referrals/ReferralsDeletedPanel";
 import { CapacityBadge } from "@/components/referrals/CapacityBadge";
+import { NewReferralDialog } from "@/components/referrals/NewReferralDialog";
 import {
   computeTopWards,
   filterReferrals,
@@ -34,6 +35,7 @@ export default function Referrals() {
   const [sortTick, setSortTick] = useState(0);
   const [showDeleted, setShowDeleted] = useState(false);
   const [restoringId, setRestoringId] = useState(null);
+  const [newReferralOpen, setNewReferralOpen] = useState(false);
 
   useEffect(() => {
     if (timerSort === "none") return;
@@ -95,6 +97,12 @@ export default function Referrals() {
     setTimerSort((cur) => (cur === "none" ? "desc" : cur === "desc" ? "asc" : "none"));
   };
 
+  const handleCreateReferral = async (payload) => {
+    await base44.entities.Referral.create(payload);
+    setNewReferralOpen(false);
+    await load();
+  };
+
   const handleRestore = async (id) => {
     setRestoringId(id);
     await base44.entities.Referral.update(id, { deleted_at: null });
@@ -121,7 +129,7 @@ export default function Referrals() {
             />
             Show deleted
           </label>
-          <Button>
+          <Button onClick={() => setNewReferralOpen(true)}>
             <Plus className="w-4 h-4 mr-1" /> New referral
           </Button>
         </div>
@@ -163,6 +171,12 @@ export default function Referrals() {
         loading={loading}
         timerSort={timerSort}
         onToggleTimerSort={toggleTimerSort}
+      />
+
+      <NewReferralDialog
+        open={newReferralOpen}
+        onOpenChange={setNewReferralOpen}
+        onCreated={handleCreateReferral}
       />
     </div>
   );

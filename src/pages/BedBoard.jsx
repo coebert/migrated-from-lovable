@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { AdmitDialog } from "@/components/bed-board/AdmitDialog";
 import { Activity, Bed, AlertTriangle, TrendingUp, ScrollText, RefreshCcw, Rows2, Rows3 } from "lucide-react";
+import { formatDistanceToNowStrict } from "date-fns";
 import { dayOfStay } from "@/lib/sampleData";
 
 function CapacityStrip({ total, occupied }) {
@@ -47,6 +48,7 @@ export default function BedBoard() {
   const [beds, setBeds] = useState([]);
   const [occupancies, setOccupancies] = useState([]);
   const [referralCount, setReferralCount] = useState(0);
+  const [auditLogs, setAuditLogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -56,14 +58,16 @@ export default function BedBoard() {
   const [density, setDensity] = useState("comfortable");
 
   const load = async () => {
-    const [b, o, r] = await Promise.all([
+    const [b, o, r, a] = await Promise.all([
       base44.entities.Bed.list(),
       base44.entities.Occupancy.list(),
       base44.entities.Referral.filter({ status: "pending" }),
+      base44.entities.AuditLog.list("-created_date", 10),
     ]);
     setBeds(b);
     setOccupancies(o);
     setReferralCount(r.length);
+    setAuditLogs(a);
     setLoading(false);
     setRefreshing(false);
   };
@@ -125,13 +129,11 @@ export default function BedBoard() {
   const vented = occupancies.filter((o) => o.ventilated).length;
   const wardable = occupancies.filter((o) => o.wardable).length;
 
-  const logs = [
-    { t: "2m ago", text: "Bed CC-03 — RRT circuit changed" },
-    { t: "18m ago", text: "Referral accepted by Dr Patel" },
-    { t: "41m ago", text: "Bed CC-10 — vasopressors weaned" },
-    { t: "1h ago", text: "Bed CC-06 — discharged to ward" },
-    { t: "2h ago", text: "Bed CC-14 — admitted from theatre" },
-  ];
+  const logs = auditLogs.map((a) => ({
+    t: a.created_date ? formatDistanceToNowStrict(new Date(a.created_date), { addSuffix: true }) : "",
+    text: [a.action, a.entity ? a.entity : "", a.user_name ? `— ${a.user_name}` : "", a.details ? `· ${a.details}` : ""]
+      .filter(Boolean).join(" "),
+  }));
 
   const cardMinH = density === "compact" ? "min-h-24" : "min-h-28";
 
