@@ -9,6 +9,7 @@ import ScrollToTop from './components/ScrollToTop';
 import Layout from '@/components/Layout';
 import BedBoard from '@/pages/BedBoard';
 import Referrals from '@/pages/Referrals';
+import ReferralDetail from '@/pages/ReferralDetail';
 import Inbox from '@/pages/Inbox';
 import PostOp from '@/pages/PostOp';
 import Analytics from '@/pages/Analytics';
@@ -44,6 +45,7 @@ const AuthenticatedApp = () => {
       <Route element={<Layout />}>
         <Route path="/" element={<BedBoard />} />
         <Route path="/referrals" element={<Referrals />} />
+        <Route path="/referrals/:id" element={<ReferralDetail />} />
         <Route path="/inbox" element={<Inbox />} />
         <Route path="/postop" element={<PostOp />} />
         <Route path="/analytics" element={<Analytics />} />
