@@ -11,8 +11,10 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { Plus, CalendarClock, Pencil, Trash2, CalendarDays } from "lucide-react";
+import { Plus, CalendarClock, Trash2, CalendarDays, List } from "lucide-react";
 import { format, parseISO } from "date-fns";
+import { NewBookingDialog } from "@/components/postop/NewBookingDialog";
+import { PlannerView } from "@/components/postop/PlannerView";
 
 const LEVEL_LABEL = {
   level_1: "Level 1",
@@ -46,6 +48,8 @@ export default function PostOp() {
   const [pendingDelete, setPendingDelete] = useState(null);
   const [deleting, setDeleting] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [newOpen, setNewOpen] = useState(false);
+  const [view, setView] = useState("list");
 
   const load = async () => {
     setLoading(true);
@@ -75,6 +79,12 @@ export default function PostOp() {
     setItems((cur) => cur.map((b) => b.id === id ? { ...b, booking_status: status } : b));
   };
 
+  const handleCreate = async (payload) => {
+    await base44.entities.PostopBooking.create(payload);
+    setNewOpen(false);
+    await load();
+  };
+
   return (
     <div className="max-w-5xl mx-auto space-y-4">
       <div className="flex items-center justify-between gap-3 flex-wrap">
@@ -85,10 +95,25 @@ export default function PostOp() {
           </p>
         </div>
         <div className="flex gap-2 items-center flex-wrap">
-          <Button variant="outline">
-            <CalendarDays className="w-4 h-4 mr-1" /> Planner
-          </Button>
-          <Button>
+          <div className="flex rounded-md border border-border overflow-hidden">
+            <Button
+              variant={view === "list" ? "default" : "ghost"}
+              size="sm"
+              className="rounded-none"
+              onClick={() => setView("list")}
+            >
+              <List className="w-4 h-4 mr-1" /> List
+            </Button>
+            <Button
+              variant={view === "planner" ? "default" : "ghost"}
+              size="sm"
+              className="rounded-none"
+              onClick={() => setView("planner")}
+            >
+              <CalendarDays className="w-4 h-4 mr-1" /> Planner
+            </Button>
+          </div>
+          <Button onClick={() => setNewOpen(true)}>
             <Plus className="w-4 h-4 mr-1" /> New booking
           </Button>
         </div>
@@ -98,13 +123,17 @@ export default function PostOp() {
         <Card className="p-6 text-sm text-muted-foreground">Loading…</Card>
       )}
 
-      {!loading && visible.length === 0 && (
+      {!loading && visible.length === 0 && view === "list" && (
         <Card className="p-8 text-center text-sm text-muted-foreground">
           No post-op bookings yet. Use "New booking" to add one.
         </Card>
       )}
 
-      {!loading && visible.length > 0 && (
+      {!loading && view === "planner" && (
+        <PlannerView items={visible} />
+      )}
+
+      {!loading && view === "list" && visible.length > 0 && (
         <div className="grid gap-3">
           {visible.map((b) => (
             <Card key={b.id} className="p-4 space-y-2">
@@ -207,6 +236,12 @@ export default function PostOp() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <NewBookingDialog
+        open={newOpen}
+        onOpenChange={setNewOpen}
+        onCreated={handleCreate}
+      />
     </div>
   );
 }
