@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/select";
 import { Bell, Check, ChevronLeft, ChevronRight, Search, X, ExternalLink } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
+import { useNavigate } from "react-router-dom";
 
 const KIND_LABEL = {
   new: "New referral",
@@ -27,6 +28,7 @@ const KIND_LABEL = {
 const PAGE_SIZE = 25;
 
 export default function Inbox() {
+  const navigate = useNavigate();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState("all");
@@ -79,6 +81,10 @@ export default function Inbox() {
   const visibleIds = visible.map((n) => n.id);
   const allVisibleSelected = visible.length > 0 && visible.every((n) => selected.has(n.id));
   const someVisibleSelected = visible.some((n) => selected.has(n.id)) && !allVisibleSelected;
+  const selectAllRef = useRef(null);
+  useEffect(() => {
+    if (selectAllRef.current) selectAllRef.current.indeterminate = someVisibleSelected;
+  }, [someVisibleSelected]);
 
   const hasFilters = q || kindFilter !== "all" || from || to;
   const unreadCount = items.filter((n) => !n.read_at).length;
@@ -213,8 +219,9 @@ export default function Inbox() {
             <div className="flex items-center gap-2 flex-wrap px-1">
               <label className="flex items-center gap-1.5 text-sm text-muted-foreground cursor-pointer">
                 <input
+                  ref={selectAllRef}
                   type="checkbox"
-                  checked={allVisibleSelected ? true : someVisibleSelected ? "indeterminate" : false}
+                  checked={allVisibleSelected}
                   onChange={(e) => toggleAllVisible(e.target.checked)}
                   className="rounded border-border"
                 />
@@ -298,7 +305,7 @@ export default function Inbox() {
                         title="Open referral"
                         onClick={() => {
                           if (!n.read_at) markRead(n.id);
-                          window.location.href = `/referrals`;
+                          navigate(`/referrals/${n.referral_id}`);
                         }}
                       >
                         <ExternalLink className="w-4 h-4" />

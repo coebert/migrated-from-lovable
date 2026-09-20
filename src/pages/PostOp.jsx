@@ -3,8 +3,6 @@ import { base44 } from "@/api/base44Client";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
 import {
   Dialog,
   DialogContent,
@@ -45,7 +43,6 @@ const STATUS_CLASS = {
 export default function PostOp() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [showDeleted, setShowDeleted] = useState(false);
   const [pendingDelete, setPendingDelete] = useState(null);
   const [deleting, setDeleting] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -88,10 +85,6 @@ export default function PostOp() {
           </p>
         </div>
         <div className="flex gap-2 items-center flex-wrap">
-          <div className="flex items-center gap-2 mr-1">
-            <Switch id="show-deleted" checked={showDeleted} onCheckedChange={setShowDeleted} />
-            <Label htmlFor="show-deleted" className="text-sm cursor-pointer">Show deleted</Label>
-          </div>
           <Button variant="outline">
             <CalendarDays className="w-4 h-4 mr-1" /> Planner
           </Button>

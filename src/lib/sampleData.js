@@ -67,6 +67,7 @@ export const TEAM = [
 ];
 
 export const dayOfStay = (admittedAt) => {
+  if (!admittedAt) return 0;
   const diff = Date.now() - new Date(admittedAt).getTime();
   return Math.max(1, Math.floor(diff / 86400000));
 };
