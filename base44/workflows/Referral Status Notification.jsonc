@@ -1,0 +1,42 @@
+{
+  "name": "Referral Status Notification",
+  "description": "Creates an inbox notification with a templated message whenever a referral's status changes",
+  "trigger": {
+    "config": {
+      "trigger_type": "entity",
+      "entity_name": "Referral",
+      "events": [
+        "update"
+      ]
+    },
+    "condition": "${ .trigger.data.status != .trigger.old_data.status }"
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "referral_status_notification",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "send_notification": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "referralStatusNotification",
+            "args": {
+              "referral_id": "${ .trigger.entity_id }",
+              "old_status": "${ .trigger.old_data.status }",
+              "new_status": "${ .trigger.data.status }"
+            }
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Send status notification",
+            "description": "Create inbox notification from template"
+          }
+        }
+      }
+    ]
+  }
+}
